@@ -1,62 +1,41 @@
-let mongoose = require('mongoose');
+var express = require('express');
+var bodyParser = require('body-parser');
+
+let { mongoose } = require('./db/mongoose');
+let { Todo } = require('./models/todo');
+let { User } = require('./models/user');
 
 
-// Mongooze config
-mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost:27017/TodoApp');
+let app = express();
 
 
-// Schema?
-let Todo = mongoose.model('Todo', {
-    text: {
-        type: String,
-        required: true,
-        minlength: 1,
-        trim: true // removes any leading and trailing space
-    }, 
-    completed: {
-        type: Boolean,
-        default: false
-    },
-    completedAt: {
-        type: Number,
-        default: null
-    }
-});
+// MIDDLEWARE
+// body parser will conver the string to an object and pass it to the request
+app.use(bodyParser.json());
 
-// new record
-let newTodo = new Todo({
-    text: 'Sleep at last'
-});
 
-// save the record
-newTodo.save()
-    .then( (doc) => {
-        console.log('saved todo', doc);
-    }, (err) => {
-        console.log('Unable to save todo')
+// POST
+app.post('/todos', (req, res) => {
+    let todo = new Todo({
+        text: req.body.text
     });
+    todo.save()
+        .then((doc) => {
+            res.send(doc);
+        }, (e) => {
+            res.status(400).send(e);
+        })
+})
 
-// User
 
-let User = mongoose.Model('User' , {
-    email: {
-        type: String,
-        required: true,
-        trim: true,
-        minlength: 1
-    }
-});
+app.listen(3000, () => {
+    console.log('serving on port 3000');
+ })
 
-let newUser = new User({
-    email: "JohnDoe@gmail.com"
-});
 
-newUser.save()
-    .then( (doc) => {
-        console.log('User created', doc);
-    }, (e) => {
-        console.log('unable to create user');
-    })
+
+
+
+
 
 
